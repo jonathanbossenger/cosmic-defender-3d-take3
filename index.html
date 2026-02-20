@@ -3,104 +3,457 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Shooter Game</title>
+  <title>Cosmic Defender 3D</title>
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      margin: 0;
-      padding: 0;
       overflow: hidden;
-      background-color: #000;
+      background: #000;
+      font-family: 'Courier New', monospace;
+      color: #fff;
+      user-select: none;
     }
-    canvas {
-      display: block;
-    }
-    #loading-screen {
+    canvas { display: block; }
+
+    /* Overlay screens */
+    .screen {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #000;
+      inset: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: white;
-      font-family: Arial, sans-serif;
-      z-index: 999;
+      z-index: 100;
+      transition: opacity 0.3s;
     }
-    #loading-bar {
+    .screen.hidden { display: none; }
+
+    /* Loading screen */
+    #loading-screen { background: #000; }
+    #loading-screen h1 {
+      font-size: 2.5rem;
+      color: #0af;
+      text-shadow: 0 0 20px #0af, 0 0 40px #06f;
+      margin-bottom: 1rem;
+    }
+    #loading-screen .bar-track {
       width: 300px;
-      height: 20px;
-      background-color: #333;
-      margin-top: 20px;
-      border-radius: 10px;
+      height: 6px;
+      background: #222;
+      border-radius: 3px;
       overflow: hidden;
+      margin-top: 0.5rem;
     }
-    #loading-bar-fill {
+    #loading-screen .bar-fill {
       height: 100%;
       width: 0%;
-      background-color: #0f0;
-      transition: width 0.3s;
+      background: linear-gradient(90deg, #0af, #0ff);
+      transition: width 0.2s;
     }
-    #game-ui {
+    #loading-screen p { color: #889; font-size: 0.9rem; }
+
+    /* Main menu */
+    #menu-screen {
+      background: radial-gradient(ellipse at center, #0a0a2a 0%, #000 70%);
+    }
+    #menu-screen h1 {
+      font-size: 3rem;
+      color: #0af;
+      text-shadow: 0 0 30px #0af, 0 0 60px #06f;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.2em;
+    }
+    #menu-screen .subtitle {
+      color: #668;
+      font-size: 1rem;
+      margin-bottom: 3rem;
+    }
+    .menu-btn {
+      display: block;
+      width: 240px;
+      padding: 14px 0;
+      margin: 8px 0;
+      background: transparent;
+      border: 1px solid #0af;
+      color: #0af;
+      font-family: 'Courier New', monospace;
+      font-size: 1.1rem;
+      cursor: pointer;
+      letter-spacing: 0.15em;
+      transition: all 0.2s;
+    }
+    .menu-btn:hover {
+      background: rgba(0, 170, 255, 0.15);
+      box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+    }
+    #menu-screen .high-score {
+      margin-top: 2rem;
+      color: #ff0;
+      font-size: 1.1rem;
+      text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+    }
+    #menu-screen .controls-hint {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
+      bottom: 2rem;
+      color: #445;
+      font-size: 0.8rem;
+      text-align: center;
+      line-height: 1.8;
     }
+
+    /* Pause screen */
+    #pause-screen { background: rgba(0, 0, 0, 0.7); }
+    #pause-screen h2 {
+      font-size: 2rem;
+      color: #0af;
+      text-shadow: 0 0 20px #0af;
+      margin-bottom: 2rem;
+    }
+
+    /* Game over screen */
+    #gameover-screen { background: rgba(0, 0, 0, 0.85); }
+    #gameover-screen h2 {
+      font-size: 2.5rem;
+      color: #f44;
+      text-shadow: 0 0 30px #f44;
+      margin-bottom: 0.5rem;
+    }
+    #gameover-screen .final-score {
+      font-size: 2rem;
+      color: #ff0;
+      text-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+      margin-bottom: 0.5rem;
+    }
+    #gameover-screen .stats {
+      color: #889;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+    .new-high-score {
+      color: #ff0;
+      font-size: 1.2rem;
+      text-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+      animation: pulse 1s infinite;
+      margin-bottom: 1rem;
+    }
+    .new-high-score.hidden { display: none; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Wave announcement */
+    #wave-announce {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #wave-announce.visible { opacity: 1; }
+    #wave-announce .wave-num {
+      font-size: 3rem;
+      color: #0af;
+      text-shadow: 0 0 30px #0af, 0 0 60px #06f;
+    }
+    #wave-announce .wave-sub {
+      font-size: 1rem;
+      color: #889;
+      margin-top: 0.5rem;
+    }
+
+    /* HUD */
+    #hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+    #hud.hidden { display: none; }
+
+    /* Crosshair */
     #crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+    }
+    #crosshair .ch-line {
+      position: absolute;
+      background: rgba(0, 255, 255, 0.8);
+    }
+    #crosshair .ch-h { width: 8px; height: 2px; top: 11px; }
+    #crosshair .ch-v { width: 2px; height: 8px; left: 11px; }
+    #crosshair .ch-l { left: 0; }
+    #crosshair .ch-r { right: 0; }
+    #crosshair .ch-t { top: 0; }
+    #crosshair .ch-b { bottom: 0; }
+    #crosshair .ch-dot {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      top: 11px;
+      left: 11px;
+      background: rgba(0, 255, 255, 1);
+    }
+
+    /* Health bar */
+    #health-container {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+    }
+    #health-container .label {
+      font-size: 0.7rem;
+      color: #888;
+      margin-bottom: 3px;
+    }
+    #health-track {
+      width: 200px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    #health-fill {
+      height: 100%;
+      width: 100%;
+      background: #0f4;
+      transition: width 0.2s, background 0.2s;
+    }
+    #shield-track {
+      width: 200px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.05);
+      margin-top: 2px;
+    }
+    #shield-fill {
+      height: 100%;
+      width: 100%;
+      background: #0af;
+      transition: width 0.2s;
+    }
+
+    /* Ammo */
+    #ammo-display {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      text-align: right;
+    }
+    #ammo-display .ammo-count {
+      font-size: 2rem;
+      color: #fff;
+    }
+    #ammo-display .ammo-count.low { color: #f84; }
+    #ammo-display .ammo-count.reloading { color: #888; }
+    #ammo-display .ammo-label {
+      font-size: 0.7rem;
+      color: #888;
+    }
+
+    /* Score */
+    #score-display {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      text-align: right;
+    }
+    #score-display .score-val {
+      font-size: 1.5rem;
+      color: #ff0;
+      text-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+    }
+    #score-display .score-label {
+      font-size: 0.6rem;
+      color: #888;
+    }
+
+    /* Wave indicator */
+    #wave-display {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+    #wave-display .wave-val {
+      font-size: 1.2rem;
+      color: #0af;
+    }
+    #wave-display .wave-label {
+      font-size: 0.6rem;
+      color: #888;
+    }
+
+    /* Combo */
+    #combo-display {
+      position: absolute;
+      top: 55px;
+      right: 30px;
+      text-align: right;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #combo-display.active { opacity: 1; }
+    #combo-display .combo-val {
+      font-size: 1rem;
+      color: #f80;
+      text-shadow: 0 0 10px rgba(255, 136, 0, 0.5);
+    }
+
+    /* Enemy count */
+    #enemies-display {
+      position: absolute;
+      top: 20px;
+      left: 30px;
+    }
+    #enemies-display .enemies-val {
+      font-size: 1rem;
+      color: #f66;
+    }
+    #enemies-display .enemies-label {
+      font-size: 0.6rem;
+      color: #888;
+    }
+
+    /* Hit marker */
+    #hit-marker {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       width: 20px;
       height: 20px;
-      opacity: 0.7;
+      opacity: 0;
+      pointer-events: none;
     }
-    #health-bar {
+    #hit-marker .hm-line {
       position: absolute;
-      bottom: 30px;
-      left: 30px;
-      width: 200px;
-      height: 20px;
-      background-color: rgba(0, 0, 0, 0.5);
-      border: 2px solid white;
+      width: 8px;
+      height: 2px;
+      background: #fff;
+      transform-origin: center;
     }
-    #health-fill {
-      width: 100%;
-      height: 100%;
-      background-color: #f00;
-    }
-    #ammo-counter {
-      position: absolute;
-      bottom: 30px;
-      right: 30px;
-      color: white;
-      font-family: Arial, sans-serif;
-      font-size: 24px;
+    #hit-marker .hm-tl { top: 2px; left: 2px; transform: rotate(45deg); }
+    #hit-marker .hm-tr { top: 2px; right: 2px; transform: rotate(-45deg); }
+    #hit-marker .hm-bl { bottom: 2px; left: 2px; transform: rotate(-45deg); }
+    #hit-marker .hm-br { bottom: 2px; right: 2px; transform: rotate(45deg); }
+
+    /* Damage vignette */
+    #damage-vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9;
+      opacity: 0;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(255, 0, 0, 0.6) 100%);
+      transition: opacity 0.1s;
     }
   </style>
 </head>
 <body>
-  <div id="loading-screen">
-    <h1>3D Shooter Game</h1>
-    <p>Loading...</p>
-    <div id="loading-bar">
-      <div id="loading-bar-fill"></div>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="screen">
+    <h1>COSMIC DEFENDER</h1>
+    <p>Loading assets...</p>
+    <div class="bar-track">
+      <div class="bar-fill" id="loading-fill"></div>
     </div>
   </div>
-  
-  <div id="game-ui">
-    <div id="crosshair">+</div>
-    <div id="health-bar">
-      <div id="health-fill"></div>
+
+  <!-- Main Menu -->
+  <div id="menu-screen" class="screen hidden">
+    <h1>COSMIC DEFENDER</h1>
+    <p class="subtitle">DEFEND HUMANITY AGAINST THE ALIEN INVASION</p>
+    <button class="menu-btn" id="btn-play">PLAY</button>
+    <button class="menu-btn" id="btn-how">HOW TO PLAY</button>
+    <p class="high-score" id="menu-high-score"></p>
+    <div class="controls-hint" id="controls-hint">
+      WASD - Move &nbsp; | &nbsp; MOUSE - Aim &nbsp; | &nbsp; LEFT CLICK - Shoot &nbsp; | &nbsp; R - Reload<br>
+      ESC - Pause
     </div>
-    <div id="ammo-counter">30/90</div>
   </div>
-  
-  <script type="module" src="/src/js/main.js"></script>
+
+  <!-- Pause Screen -->
+  <div id="pause-screen" class="screen hidden">
+    <h2>PAUSED</h2>
+    <button class="menu-btn" id="btn-resume">RESUME</button>
+    <button class="menu-btn" id="btn-quit">QUIT TO MENU</button>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="gameover-screen" class="screen hidden">
+    <h2>GAME OVER</h2>
+    <p class="new-high-score hidden" id="new-high-score">NEW HIGH SCORE!</p>
+    <p class="final-score" id="final-score">0</p>
+    <div class="stats" id="final-stats"></div>
+    <button class="menu-btn" id="btn-restart">PLAY AGAIN</button>
+    <button class="menu-btn" id="btn-menu">MAIN MENU</button>
+  </div>
+
+  <!-- Wave Announcement -->
+  <div id="wave-announce">
+    <div class="wave-num" id="wave-announce-num">WAVE 1</div>
+    <div class="wave-sub" id="wave-announce-sub">Prepare yourself</div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="crosshair">
+      <div class="ch-line ch-h ch-l"></div>
+      <div class="ch-line ch-h ch-r"></div>
+      <div class="ch-line ch-v ch-t"></div>
+      <div class="ch-line ch-v ch-b"></div>
+      <div class="ch-dot"></div>
+    </div>
+
+    <div id="health-container">
+      <div class="label">HEALTH</div>
+      <div id="health-track"><div id="health-fill"></div></div>
+      <div id="shield-track"><div id="shield-fill"></div></div>
+    </div>
+
+    <div id="ammo-display">
+      <div class="ammo-count" id="ammo-count">20</div>
+      <div class="ammo-label">AMMO</div>
+    </div>
+
+    <div id="score-display">
+      <div class="score-label">SCORE</div>
+      <div class="score-val" id="score-val">0</div>
+    </div>
+
+    <div id="wave-display">
+      <div class="wave-label">WAVE</div>
+      <div class="wave-val" id="wave-val">1</div>
+    </div>
+
+    <div id="combo-display">
+      <div class="combo-val" id="combo-val">x1.0</div>
+    </div>
+
+    <div id="enemies-display">
+      <div class="enemies-label">ENEMIES</div>
+      <div class="enemies-val" id="enemies-val">0</div>
+    </div>
+
+    <div id="hit-marker">
+      <div class="hm-line hm-tl"></div>
+      <div class="hm-line hm-tr"></div>
+      <div class="hm-line hm-bl"></div>
+      <div class="hm-line hm-br"></div>
+    </div>
+  </div>
+
+  <div id="damage-vignette"></div>
+
+  <script type="module" src="/src/main.js"></script>
 </body>
-</html> 
+</html>
