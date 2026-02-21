@@ -21,9 +21,11 @@ export class Arena {
     // Main floor
     const floorGeo = new THREE.CircleGeometry(ARENA_RADIUS, 64);
     const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x1a1a2e,
+      color: 0x3d4a5c,
       metalness: 0.3,
-      roughness: 0.7,
+      roughness: 0.5,
+      emissive: 0x0a1020,
+      emissiveIntensity: 0.4,
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
@@ -34,10 +36,10 @@ export class Arena {
     // Grid lines
     const gridGeo = new THREE.CircleGeometry(ARENA_RADIUS, 64);
     const gridMat = new THREE.MeshBasicMaterial({
-      color: 0x0a3060,
+      color: 0x30a0e0,
       wireframe: true,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.35,
     });
     const grid = new THREE.Mesh(gridGeo, gridMat);
     grid.rotation.x = -Math.PI / 2;
@@ -48,9 +50,9 @@ export class Arena {
     for (let r = 5; r <= ARENA_RADIUS; r += 5) {
       const ringGeo = new THREE.RingGeometry(r - 0.02, r + 0.02, 64);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x0a3060,
+        color: 0x30a0e0,
         transparent: true,
-        opacity: 0.2,
+        opacity: 0.4,
         side: THREE.DoubleSide,
       });
       const ring = new THREE.Mesh(ringGeo, ringMat);
@@ -64,9 +66,9 @@ export class Arena {
     // Glowing edge ring
     const edgeGeo = new THREE.TorusGeometry(ARENA_RADIUS, 0.08, 8, 128);
     const edgeMat = new THREE.MeshBasicMaterial({
-      color: 0x0088ff,
+      color: 0x00ccff,
       transparent: true,
-      opacity: 0.6,
+      opacity: 1.0,
     });
     const edge = new THREE.Mesh(edgeGeo, edgeMat);
     edge.rotation.x = Math.PI / 2;
@@ -76,9 +78,9 @@ export class Arena {
     // Outer glow
     const glowGeo = new THREE.TorusGeometry(ARENA_RADIUS, 0.3, 8, 128);
     const glowMat = new THREE.MeshBasicMaterial({
-      color: 0x0044aa,
+      color: 0x0088ff,
       transparent: true,
-      opacity: 0.1,
+      opacity: 0.35,
     });
     const glow = new THREE.Mesh(glowGeo, glowMat);
     glow.rotation.x = Math.PI / 2;
@@ -88,9 +90,9 @@ export class Arena {
     // Vertical energy wall (subtle)
     const wallGeo = new THREE.CylinderGeometry(ARENA_RADIUS + 0.1, ARENA_RADIUS + 0.1, 3, 64, 1, true);
     const wallMat = new THREE.MeshBasicMaterial({
-      color: 0x0066cc,
+      color: 0x0088ff,
       transparent: true,
-      opacity: 0.03,
+      opacity: 0.06,
       side: THREE.DoubleSide,
     });
     const wall = new THREE.Mesh(wallGeo, wallMat);
@@ -112,11 +114,11 @@ export class Arena {
     }
 
     const coverMat = new THREE.MeshStandardMaterial({
-      color: 0x2a2a4a,
-      metalness: 0.6,
+      color: 0x4a5568,
+      metalness: 0.5,
       roughness: 0.4,
-      emissive: 0x0a0a20,
-      emissiveIntensity: 0.2,
+      emissive: 0x182840,
+      emissiveIntensity: 0.5,
     });
 
     coverPositions.forEach((pos, i) => {
@@ -140,7 +142,7 @@ export class Arena {
 
       // Edge glow accent
       const edgesGeo = new THREE.EdgesGeometry(geo);
-      const edgesMat = new THREE.LineBasicMaterial({ color: 0x0066aa, transparent: true, opacity: 0.3 });
+      const edgesMat = new THREE.LineBasicMaterial({ color: 0x00aaff, transparent: true, opacity: 0.6 });
       const edges = new THREE.LineSegments(edgesGeo, edgesMat);
       cover.add(edges);
 
@@ -165,8 +167,8 @@ export class Arena {
         varying vec3 vWorldPos;
         void main() {
           float h = normalize(vWorldPos).y;
-          vec3 bottom = vec3(0.02, 0.02, 0.06);
-          vec3 top = vec3(0.0, 0.0, 0.02);
+          vec3 bottom = vec3(0.005, 0.005, 0.02);
+          vec3 top = vec3(0.0, 0.0, 0.005);
           vec3 col = mix(bottom, top, smoothstep(-0.2, 0.5, h));
           gl_FragColor = vec4(col, 1.0);
         }
@@ -227,11 +229,11 @@ export class Arena {
 
   _buildLighting() {
     // Ambient
-    const ambient = new THREE.AmbientLight(0x223344, 0.4);
+    const ambient = new THREE.AmbientLight(0x445566, 0.7);
     this.scene.add(ambient);
 
     // Main directional light (moonlight feel)
-    const dirLight = new THREE.DirectionalLight(0x4466aa, 0.6);
+    const dirLight = new THREE.DirectionalLight(0x6688cc, 1.0);
     dirLight.position.set(10, 20, 5);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.width = 1024;
@@ -245,13 +247,13 @@ export class Arena {
     this.scene.add(dirLight);
 
     // Rim light from below
-    const rimLight = new THREE.DirectionalLight(0x0066ff, 0.2);
+    const rimLight = new THREE.DirectionalLight(0x0088ff, 0.4);
     rimLight.position.set(0, -5, 0);
     this.scene.add(rimLight);
 
     // Center platform glow
-    const centerLight = new THREE.PointLight(0x0088ff, 0.5, 20);
-    centerLight.position.set(0, 0.1, 0);
+    const centerLight = new THREE.PointLight(0x00aaff, 1.2, 30);
+    centerLight.position.set(0, 1, 0);
     this.group.add(centerLight);
   }
 
