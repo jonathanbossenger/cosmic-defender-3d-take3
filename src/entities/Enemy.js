@@ -20,7 +20,7 @@ export const ENEMY_TYPES = {
     projectileSpeed: 15,
     color: 0x44ff44,
     emissive: 0x22aa22,
-    size: 0.5,
+    size: 0.75,
     attackRange: 20,
     preferredRange: 12,
   },
@@ -33,7 +33,7 @@ export const ENEMY_TYPES = {
     projectileSpeed: 18,
     color: 0x4488ff,
     emissive: 0x2244aa,
-    size: 0.6,
+    size: 0.95,
     attackRange: 22,
     preferredRange: 10,
     burstCount: 3,
@@ -190,6 +190,8 @@ class EnemyInstance {
 
     const s = config.size;
     this.body.scale.setScalar(s);
+    this.eye.scale.setScalar(s / 0.5);
+    this.eye.position.z = 0.4 * (s / 0.5);
 
     // Different geometry per type
     this.group.remove(this.body);
