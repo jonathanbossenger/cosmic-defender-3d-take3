@@ -43,14 +43,14 @@ export class Weapon {
 
     // Gun body
     const bodyGeo = new THREE.BoxGeometry(0.06, 0.06, 0.35);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x334455, metalness: 0.8, roughness: 0.3 });
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x8899aa, metalness: 0.6, roughness: 0.3, emissive: 0x203040, emissiveIntensity: 0.5 });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.position.z = -0.15;
     group.add(body);
 
     // Barrel
     const barrelGeo = new THREE.CylinderGeometry(0.015, 0.02, 0.2, 8);
-    const barrelMat = new THREE.MeshStandardMaterial({ color: 0x556677, metalness: 0.9, roughness: 0.2 });
+    const barrelMat = new THREE.MeshStandardMaterial({ color: 0x99aabb, metalness: 0.8, roughness: 0.2, emissive: 0x182838, emissiveIntensity: 0.3 });
     const barrel = new THREE.Mesh(barrelGeo, barrelMat);
     barrel.rotation.x = Math.PI / 2;
     barrel.position.z = -0.4;
@@ -58,7 +58,7 @@ export class Weapon {
 
     // Glow tip
     const tipGeo = new THREE.SphereGeometry(0.018, 8, 8);
-    const tipMat = new THREE.MeshBasicMaterial({ color: 0x00aaff });
+    const tipMat = new THREE.MeshBasicMaterial({ color: 0x00eeff });
     const tip = new THREE.Mesh(tipGeo, tipMat);
     tip.position.z = -0.5;
     group.add(tip);
