@@ -42,6 +42,8 @@ export const ENEMY_TYPES = {
 };
 
 const POOL_SIZE = 40;
+const BASE_ENEMY_SIZE = 0.5; // Original geometry scale used for eye proportions
+const BASE_EYE_Z_OFFSET = 0.4;
 
 export class EnemyManager {
   constructor(scene) {
@@ -190,8 +192,9 @@ class EnemyInstance {
 
     const s = config.size;
     this.body.scale.setScalar(s);
-    this.eye.scale.setScalar(s / 0.5);
-    this.eye.position.z = 0.4 * (s / 0.5);
+    const sizeScale = s / BASE_ENEMY_SIZE;
+    this.eye.scale.setScalar(sizeScale);
+    this.eye.position.z = BASE_EYE_Z_OFFSET * sizeScale;
 
     // Different geometry per type
     this.group.remove(this.body);
